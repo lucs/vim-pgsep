@@ -1,0 +1,176 @@
+*pgsep.txt*    Plugin for handling custom page separator lines
+
+Author:  Luc St-Louis <lucs@pobox.com>
+License: Same terms as Vim itself
+
+======================================================================
+1. Contents                                             *pgsep_contents*
+
+    1. Summary                          |pgsep_summary|
+    2. Synopsis                         |pgsep_synopsis|
+    3. Defining a page separator        |pgsep_define|
+    4. Using a page separator           |pgsep_use|
+    5. Navigating the page separators   |pgsep_prac|
+    6. Practical page separators        |pgsep_prac|
+
+======================================================================
+1. Summary                                               *pgsep_summary*
+
+I like to put "page separator" lines in my files. These are special
+lines that this plugin is made to navigate to. I can do a "Page down"
+or "Page up" and the plugin will scroll the text so that the next or
+previous page separator line and the cursor are placed at the top of
+the screen. The plugin can also paste in these separator lines.
+
+A page separator is identified by its nick and it has a pattern and a
+line. For example, for Vimscript code, one could define a separator
+like this:
+
+    nick    : ｢vim｣ 
+    pattern : ｢^" -----｣
+    line    : ｢" ------------------------------｣
+
+======================================================================
+2. Synopsis                                             *pgsep_synopsis*
+
+    Define a page separator.
+:call PgSep_New(｢nick｣, ｢patt｣, ｢line｣)
+
+Page down        ｢<Leader>j｣
+Page up          ｢<Leader>k｣
+Insert separator ｢<Leader>i｣
+
+======================================================================
+3. Defining a page separator                              *pgsep_define*
+
+Use this function to define a page separator:
+
+    PgSep_New(｢nick｣, ｢page separator regex｣, ｢page separator text｣)
+
+For example:
+
+    :call PgSep_New(
+      \ 'perl',
+      \ '^# ----------'
+      \ '# ----------------------------------------'
+    \)
+
+This will place the definition in the global dictionary variable
+｢g:PgSep_defs｣, whose keys are the page separator nicks and whose
+values are themselves two element dictionaries, with keys of ｢patt｣
+and ｢line｣, to store the pattern and the line. The definition above
+for example would add (or overwrite) a ｢g:PgSep_defs['perl']｣ entry
+and set its contents to ｢{'patt':'^# ----------' , 'line':'#
+----------------------------------------' }｣
+
+From that moment on, that page separator is available.
+
+======================================================================
+4. Using a page separator                                    *pgsep_use*
+
+func! PgSep_AddPatt (｢nick｣)
+func! PgSep_RemPatt (｢nick｣)
+func! PgSep_SetLine (｢nick｣)
+
+======================================================================
+
+func! PgSep_BuildSepPatt ()
+func! PgSep_insert ()
+func! PgSep_OnlyPatt (nick)
+func! PgSep_Main (nick)
+
+
+======================================================================
+5. Navigating the page separators                          *pgsep_navig*
+
+func! PgSep_up ()
+func! PgSep_dn ()
+func! PgSep_move(j_or_k)
+
+For example, given those values apply in the following buffer, suppose
+the cursor is anywhere on one of the first four lines:
+
+    ┌───────────────────────────────────────────────┐
+    │ # ----------------------------------------    │
+    │ Lorem ipsum dolor sit amet, consectetur       │
+    │ ...... ........ ...... .. ......... ......    │
+    │                                               │
+    │ # ----------------------------------------    │
+    │ Duis a mauris quis turpis bibendum vulput     │
+    │ ....... ...... .. ...... ......... ......     │
+    │ ......... . ..........                        │
+    │                                               │
+    │ # ----------------------------------------    │
+    │ Aliquam sed turpis diam.  Vivamus id nunc     │
+    └───────────────────────────────────────────────┘
+                                                    
+Doing a "Page down" will scroll the text so that the next found
+separator string becomes the first screen line, with the cursor on it
+(the fifth line will become the first, and the cursor will be on the
+first line, in the same column as it initially was):
+
+    ┌───────────────────────────────────────────────┐
+    │ # ----------------------------------------    │
+    │ Duis a mauris quis turpis bibendum vulput     │
+    │ ....... ...... .. ...... ......... ......     │
+    │ ......... . ..........                        │
+    │                                               │
+    │ # ----------------------------------------    │
+    │ Aliquam sed turpis diam.  Vivamus id nunc     │
+    │ ...... ... .... ......                        │
+    │                                               │
+    │ # ----------------------------------------    │
+    │ Sed ut tortor enim.                           │
+    └───────────────────────────────────────────────┘
+      
+"Page up" goes in the other direction.
+
+If we move the cursor to the fourth line and do an Insert, we will get
+a new line, with the cursor placed on it:
+
+    ┌───────────────────────────────────────────────┐
+    │ # ----------------------------------------    │
+    │ Duis a mauris quis turpis bibendum vulput     │
+    │ ....... ...... .. ...... ......... ......     │
+    │ # ----------------------------------------    │
+    │ ......... . ..........                        │
+    │                                               │
+    │ # ----------------------------------------    │
+    │ Aliquam sed turpis diam.  Vivamus id nunc     │
+    │ ...... ... .... ......                        │
+    │                                               │
+    │ # ----------------------------------------    │
+    └───────────────────────────────────────────────┘
+      
+======================================================================
+                        *pg_sep-settings*
+
+To override the default mappings (shown in comment), add in the .vimrc
+for example something like:
+
+    map gk <Plug>pg_sepUp       " Instead of <Leader>k.
+    map gj <Plug>pg_sepDn       " Instead of <Leader>j.
+    map gi <Plug>pg_sepInsert   " Instead of <Leader>i.
+
+======================================================================
+6. Practical page separators                                *pgsep_prac*
+
+"I'm on a PHP page, but I want to insert HTML separators."
+
+PHP separators are "// ----⋯", so you want Java separators:
+    
+    Set the insert line for HTML.
+<leader>l
+
+See more options with  <leader>h
+
+a Add sep type as navigation target
+r Remove sep type as navigation target
+l Set sep type for insertion
+o Make sep type the one for both insertion and navigation
+m Set the main navigation sep type
+s insr
+
+======================================================================
+vim: ft=help et tw=70 ts=4 sts=4 sw=4 :
+
