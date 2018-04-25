@@ -4,11 +4,17 @@
 " Documentation: See ../doc/pgsep.txt
 
 " --------------------------------------------------------------------
+if exists("g:loaded_pgsep") || &cp || v:version < 700
+    finish
+endif
+let g:loaded_pgsep = 1
+
+" --------------------------------------------------------------------
     " Holds the defined page separators.
     " g:PgSep_defs[｢nick｣] = {'patt':｢patt｣, 'line':｢line｣}
 let g:PgSep_defs = {}
 
-let g:_hPgSep = 'Help.Add.Rem.Line.Only.Main.inSr'
+let g:PgSep_help = 'Help.Use.Drop.Line.Only.Main.inSr'
 
     " The page separators used in the current buffer. Keys are nicks,
     " and if a given key is present, that page separator is currently
@@ -19,44 +25,68 @@ let b:PgSep_use_patt = {}
     " concatenated list of the ｢b:PgSep_use_patt｣ patterns.
 let b:PgSep_patt = ''
 
-    " The line inserted by PgSep_insert().
+    " The line inserted by PgSep_Insr().
 let b:PgSep_line = ''
 
 " --------------------------------------------------------------------
-" Add (or replace) a pgsep to g:PgSep_defs.
-
 func! PgSep_New (nick, patt, line)
     let g:PgSep_defs[a:nick] = {'patt':a:patt, 'line':a:line}
 endfunc
 
 " --------------------------------------------------------------------
-" Add a pgsep definition to the current buffer.
-
-func! PgSep_AddPatt (nick)
+func! PgSep_Add (nick)
     if ! exists("g:PgSep_defs[a:nick]")
         echo "No such PgSep nick: '" . a:nick . "'."
         return
     endif
     let b:PgSep_use_patt[a:nick] = 1
-    call s:build_sep_patt()
+    call s:build_pgsep_patt()
 endfunc
 
 " --------------------------------------------------------------------
-" Remove a pgsep definition from the current buffer.
-
-func! PgSep_RemPatt (nick)
+func! PgSep_Rem (nick)
     if ! exists("g:PgSep_defs[a:nick]")
         echo "No such PgSep nick: '" . a:nick . "'."
         return
     endif
-    unlet b:PgSep_use_patt[a:nick]
-    call s:build_sep_patt()
+    let b:PgSep_use_patt[a:nick] = 0
+   " unlet b:PgSep_use_patt[a:nick]
+    call s:build_pgsep_patt()
 endfunc
 
 " --------------------------------------------------------------------
-" Make the nick's line be the one to get inserted by PgSep_insert().
+" Construct the pgsep pattern for all the pgseps set for the current
+" buffer.
 
-func! PgSep_SetLine (nick)
+func! s:build_pgsep_patt ()
+    if len(b:PgSep_use_patt) == 0
+        return
+    endif
+    let l:patt = ""
+    for [l:nick, l:dont_care] in items(b:PgSep_use_patt)
+        if b:PgSep_use_patt[l:nick] == 1
+            let l:patt .= g:PgSep_defs[l:nick]['patt'] . '\|'
+        endif
+    endfor
+        " Chop trailing spurious '\|'.
+    let l:patt = substitute(l:patt, '..$', '', '')
+    let b:PgSep_patt = l:patt
+endfunc
+
+" --------------------------------------------------------------------
+func! PgSep_Only (nick)
+    if ! exists("g:PgSep_defs[a:nick]")
+        echo "No such PgSep nick: '" . a:nick . "'."
+        return
+    endif
+    let b:PgSep_use_patt = {}
+    let b:PgSep_patt = ''
+    call PgSep_Add(a:nick)
+    call PgSep_Line(a:nick)
+endfunc
+
+" --------------------------------------------------------------------
+func! PgSep_Line (nick)
     if ! exists("g:PgSep_defs[a:nick]")
         echo "No such PgSep nick: '" . a:nick . "'."
         return
@@ -65,74 +95,16 @@ func! PgSep_SetLine (nick)
 endfunc
 
 " --------------------------------------------------------------------
-" Make a pgsep the only one defined for the current buffer.
-
-func! PgSep_OnlyPatt (nick)
-    if ! exists("g:PgSep_defs[a:nick]")
-        echo "No such PgSep nick: '" . a:nick . "'."
-        return
-    endif
-    let b:PgSep_use_patt = {}
-    let b:PgSep_patt = ''
-    call PgSep_AddPatt(a:nick)
-    call PgSep_SetLine(a:nick)
-endfunc
-
-" --------------------------------------------------------------------
 func! PgSep_Main (nick)
     if ! exists("g:PgSep_defs[a:nick]")
         echo "No such PgSep nick: '" . a:nick . "'."
         return
     endif
-    call PgSep_AddPatt(a:nick)
-    call PgSep_SetLine(a:nick)
+    call PgSep_Add(a:nick)
+    call PgSep_Line(a:nick)
 endfunc
 
 " --------------------------------------------------------------------
-" Insert the pgsep line separator for the current buffer.
-" FIXME
-
-func! PgSep_InsertLine (nick)
-    if ! exists("g:PgSep_defs[a:nick]")
-        echo "No such PgSep nick: '" . a:nick . "'."
-        return
-    endif
-    call append(line(".") - 1, g:PgSep_defs[a:nick]['line'])
-    normal k
-endfunc
-
-" --------------------------------------------------------------------
-" Construct the pgsep pattern for all the pgseps set for the current
-" buffer.
-
-func! s:build_sep_patt ()
-    if len(b:PgSep_use_patt) == 0
-        return
-    endif
-    let l:patt = ""
-    for [l:nick, l:dont_care] in items(b:PgSep_use_patt)
-        let l:patt .= g:PgSep_defs[l:nick]['patt'] . '\|'
-    endfor
-        " Chop trailing spurious '\|'.
-    let l:patt = substitute(l:patt, '..$', '', '')
-    let b:PgSep_patt = l:patt
-endfunc
-
-" --------------------------------------------------------------------
-" Insert the pgsep line separator for the current buffer.
-
-func! PgSep_insert ()
-    if b:PgSep_line == ''
-        echo "PgSep line has not been set."
-        return
-    endif
-    call append(line(".") - 1, b:PgSep_line)
-    normal k
-endfunc
-
-" --------------------------------------------------------------------
-" Make all requested pgseps the ones for the current buffer.
-
 func! PgSep_All (...)
     let b:PgSep_use_patt = {}
     if a:0 == 0
@@ -140,23 +112,32 @@ func! PgSep_All (...)
     endif
     for l:nick in a:000
         if exists("g:PgSep_defs[l:nick]")
-            call PgSep_AddPatt(l:nick)
+            call PgSep_Add(l:nick)
         endif
     endfor
-    call PgSep_SetLine(a:1)
+    call PgSep_Line(a:1)
 endfunc
 
 " --------------------------------------------------------------------
-func! PgSep_up ()
-    call PgSep_move('k')
-endfunc
-
-func! PgSep_dn ()
-    call PgSep_move('j')
+func! PgSep_Insr (...)
+    if a:0 == 0
+        if b:PgSep_line == ''
+            echo "PgSep line has not been set."
+            return
+        endif
+        call append(line(".") - 1, b:PgSep_line)
+        normal k
+    elseif ! exists("g:PgSep_defs[a:1]")
+        echo "No such PgSep nick: '" . a:1 . "'."
+        return
+    else
+        call append(line(".") - 1, g:PgSep_defs[a:1]['line'])
+        normal k
+    endif
 endfunc
 
 " --------------------------------------------------------------------
-func! PgSep_move(j_or_k)
+func! PgSep_Move(j_or_k)
     let l:last_line = line(".")
     while (1)
         exec 'normal ' . a:j_or_k
@@ -183,9 +164,8 @@ func! PgSep_move(j_or_k)
 endfunc
 
 " --------------------------------------------------------------------
-
-func! _makePgSep (params)
-    let l:what = a:params[0]
+func! s:make_pgsep (params)
+    let l:name = a:params[0]
     let l:nick = a:params[1]
         " If 1, have a space between l:open and l:midl, else don't.
     let l:spac = a:params[2]
@@ -193,7 +173,7 @@ func! _makePgSep (params)
     let l:midl = a:params[4]
     let l:clos = exists("a:params[5]") ? a:params[5] : ''
 
-    let g:_hPgSep .= ':' . l:what
+    let g:PgSep_help .= ':' . l:name
 
     let l:len_open = strlen(l:open)
     let l:len_clos = strlen(l:clos)
@@ -207,12 +187,12 @@ func! _makePgSep (params)
         let l:PgSep .= ' ' . l:clos
     endif
 
-    exec 'menu pgsep.add.'  . l:nick . " :call PgSep_AddPatt('"     . l:nick . "')<cr>"
-    exec 'menu pgsep.rem.'  . l:nick . " :call PgSep_RemPatt('"     . l:nick . "')<cr>"
-    exec 'menu pgsep.line.' . l:nick . " :call PgSep_SetLine('"     . l:nick . "')<cr>"
-    exec 'menu pgsep.only.' . l:nick . " :call PgSep_OnlyPatt('"    . l:nick . "')<cr>"
-    exec 'menu pgsep.main.' . l:nick . " :call PgSep_Main('"        . l:nick . "')<cr>"
-    exec 'menu pgsep.insr.' . l:nick . " :call PgSep_InsertLine('"  . l:nick . "')<cr>"
+    exec 'menu pgsep.add.'  . l:nick . " :call PgSep_Add('"  . l:nick . "')<cr>"
+    exec 'menu pgsep.rem.'  . l:nick . " :call PgSep_Rem('"  . l:nick . "')<cr>"
+    exec 'menu pgsep.only.' . l:nick . " :call PgSep_Only('" . l:nick . "')<cr>"
+    exec 'menu pgsep.line.' . l:nick . " :call PgSep_Line('" . l:nick . "')<cr>"
+    exec 'menu pgsep.main.' . l:nick . " :call PgSep_Main('" . l:nick . "')<cr>"
+    exec 'menu pgsep.insr.' . l:nick . " :call PgSep_Insr('" . l:nick . "')<cr>"
 
     if l:spac == 1
         call PgSep_New(
@@ -230,46 +210,40 @@ func! _makePgSep (params)
 endfunc
 
 " --------------------------------------------------------------------
-func! _MakePgSeps ()
-    call _makePgSep(['Bash',    'b', 1, '#',    '-'])
-    call _makePgSep(['C',       'c', 1, '/*',   '-', '*/'])
-    call _makePgSep(['Dos',     'd', 1, ':-',   '-'])
-    call _makePgSep(['tExt',    'e', 1, '-',    '-'])
-    call _makePgSep(['Html',    'h', 1, '<!--', '·', '-->'])
-    call _makePgSep(['vImhelp', 'i', 0, '=',    '='])
-    call _makePgSep(['Java',    'j', 1, '//',   '-'])
-    call _makePgSep(['Lisp',    'l', 1, ';',    '-'])
-    call _makePgSep(['vrOomx',  'o', 1, '#%',   '-'])
-    call _makePgSep(['sQl',     'q', 1, '--',   '-'])
-    call _makePgSep(['Tt2',     't', 1, '[%#-', '-', '-%]'])
-    call _makePgSep(['Vim',     'v', 1, '"',    '-'])
-    call _makePgSep(['teX',     'x', 1, '%',    '-'])
-    call _makePgSep(['dZil',    'z', 1, ';-',   '-'])
+func! s:make_pgseps ()
+    call s:make_pgsep(['Bash',    'b', 1, '#',    '-'])
+    call s:make_pgsep(['C',       'c', 1, '/*',   '-', '*/'])
+    call s:make_pgsep(['Dos',     'd', 1, ':-',   '-'])
+    call s:make_pgsep(['tExt',    'e', 1, '-',    '-'])
+    call s:make_pgsep(['Html',    'h', 1, '<!--', '·', '-->'])
+    call s:make_pgsep(['vImhelp', 'i', 0, '=',    '='])
+    call s:make_pgsep(['Java',    'j', 1, '//',   '-'])
+    call s:make_pgsep(['Lisp',    'l', 1, ';',    '-'])
+    call s:make_pgsep(['vrOomx',  'o', 1, '#%',   '-'])
+    call s:make_pgsep(['sQl',     'q', 1, '--',   '-'])
+    call s:make_pgsep(['Tt2',     't', 1, '[%#-', '-', '-%]'])
+    call s:make_pgsep(['Vim',     'v', 1, '"',    '-'])
+    call s:make_pgsep(['teX',     'x', 1, '%',    '-'])
+    call s:make_pgsep(['dZil',    'z', 1, ';-',   '-'])
 endfunc
-call _MakePgSeps()
+call s:make_pgseps()
 
 " --------------------------------------------------------------------
-" Default mappings.
+nnoremap <silent> <plug>pgsepUp :call PgSep_Move('k')<cr>
+nnoremap <silent> <plug>pgsepDn :call PgSep_Move('j')<cr>
+nnoremap <silent> <plug>pgsepIn :call PgSep_Insr()<cr>
 
-if ! hasmapto('<Plug>pg_sepUp')
-    map <leader>k <plug>pg_sepUp
-endif
-if ! hasmapto('<Plug>pg_sepDn')
-    map <leader>j <plug>pg_sepDn
-endif
-if ! hasmapto('<Plug>pg_sepInsert')
-    map <leader>i <plug>pg_sepInsert
-endif
+if !exists("g:PgSep_no_mappings") || ! g:PgSep_no_mappings
+    nmap <space>k  <plug>pgsepUp
+    nmap <space>j  <plug>pgsepDn
+    nmap <space>i  <plug>pgsepIn
 
-map <plug>pg_sepUp     :call PgSep_up()<cr>
-map <plug>pg_sepDn     :call PgSep_dn()<cr>
-map <plug>pg_sepInsert :call PgSep_insert()<cr>
-
-map <leader>h :echo g:_hPgSep<cr>
-map <leader>a :emenu pgsep.add.
-map <leader>r :emenu pgsep.rem.
-map <leader>l :emenu pgsep.line.
-map <leader>o :emenu pgsep.only.
-map <leader>m :emenu pgsep.main.
-map <leader>s :emenu pgsep.insr.
+    nmap yuh :echo g:PgSep_help<cr>
+    nmap yua :emenu pgsep.add.
+    nmap yur :emenu pgsep.rem.
+    nmap yul :emenu pgsep.line.
+    nmap yuo :emenu pgsep.only.
+    nmap yum :emenu pgsep.main.
+    nmap yus :emenu pgsep.insr.
+endif
 
