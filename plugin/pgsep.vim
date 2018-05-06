@@ -14,7 +14,7 @@ let g:loaded_pgsep = 1
     " g:PgSep_defs[｢nick｣] = {'patt':｢patt｣, 'line':｢line｣}
 let g:PgSep_defs = {}
 
-let g:PgSep_help = 'Help.Use.Drop.Line.Only.Main.inSr'
+let g:PgSep_help = 'Help.Add.Rem.Line.Only.Main.inSr'
 
     " The page separators used in the current buffer. Keys are nicks,
     " and if a given key is present, that page separator is currently
