@@ -106,6 +106,7 @@ This plugin supplies many built-in separators, constructed from this:
     vImhelp  i       0        =    =
     Java     j       1        //   -
     Lisp     l       1        ;    -
+    tMplmojo m       1        %#   -
     vrOomx   o       1        #%   -
     sQl      q       1        --   -
     Tt2      t       1        [%#- -   -%]
