@@ -98,20 +98,20 @@ This plugin supplies many built-in separators, constructed from this:
 
     Name    Nick    Space?   Pfx  Mid Tail
     --------------------------------------
-    Bash    b       1        #    -
-    C       c       1        /*   -   */
-    Dos     d       1        :-   -
-    tExt    e       1        -    -
-    Html    h       1        <!-- ·   -->
-    vImhelp i       0        =    =
-    Java    j       1        //   -
-    Lisp    l       1        ;    -
-    vrOomx  o       1        #%   -
-    sQl     q       1        --   -
-    Tt2     t       1        [%#- -   -%]
-    Vim     v       1        "    -
-    teX     x       1        %    -
-    dZil    z       1        ;-   -
+    Bash     b       1        #    -
+    C        c       1        /*   -   */
+    Dos      d       1        :-   -
+    tExt     e       1        -    -
+    Html     h       1        <!-- ·   -->
+    vImhelp  i       0        =    =
+    Java     j       1        //   -
+    Lisp     l       1        ;    -
+    vrOomx   o       1        #%   -
+    sQl      q       1        --   -
+    Tt2      t       1        [%#- -   -%]
+    Vim      v       1        "    -
+    teX      x       1        %    -
+    dZil     z       1        ;-   -
 
 For example, the 'sQl' built-in separator line is 70 characters long
 (hard coded) and looks like this:
