@@ -229,21 +229,27 @@ endfunc
 call s:make_pgseps()
 
 " --------------------------------------------------------------------
-nnoremap <silent> <plug>pgsepUp :call PgSep_Move('k')<cr>
-nnoremap <silent> <plug>pgsepDn :call PgSep_Move('j')<cr>
-nnoremap <silent> <plug>pgsepIn :call PgSep_Insr()<cr>
+nnoremap <silent> <plug>pgsepUp  :call  PgSep_Move('k')<cr>
+nnoremap <silent> <plug>pgsepDn  :call  PgSep_Move('j')<cr>
+nnoremap <silent> <plug>pgsepIn  :call  PgSep_Insr()<cr>
+nnoremap          <plug>menuHelp :echo  g:PgSep_help<cr>
+nnoremap          <plug>menuAdd  :emenu pgsep.add.
+nnoremap          <plug>menuRem  :emenu pgsep.rem.
+nnoremap          <plug>menuLine :emenu pgsep.line.
+nnoremap          <plug>menuOnly :emenu pgsep.only.
+nnoremap          <plug>menuMain :emenu pgsep.main.
+nnoremap          <plug>menuInsr :emenu pgsep.insr.
 
-if !exists("g:PgSep_no_mappings") || ! g:PgSep_no_mappings
+if ! exists("g:PgSep_no_mappings") || ! g:PgSep_no_mappings
     nmap <space>k  <plug>pgsepUp
     nmap <space>j  <plug>pgsepDn
     nmap <space>i  <plug>pgsepIn
-
-    nmap yuh :echo g:PgSep_help<cr>
-    nmap yua :emenu pgsep.add.
-    nmap yur :emenu pgsep.rem.
-    nmap yul :emenu pgsep.line.
-    nmap yuo :emenu pgsep.only.
-    nmap yum :emenu pgsep.main.
-    nmap yus :emenu pgsep.insr.
+    nmap yuh       <plug>menuHelp
+    nmap yua       <plug>menuAdd
+    nmap yur       <plug>menuRem
+    nmap yul       <plug>menuLine
+    nmap yuo       <plug>menuOnly
+    nmap yum       <plug>menuMain
+    nmap yus       <plug>menuInsr
 endif
 
