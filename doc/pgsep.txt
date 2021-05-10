@@ -6,27 +6,27 @@ License: Same terms as Vim itself
 ======================================================================
 0. Contents                                             *pgsep_contents*
 
-    1. Summary                          |pgsep_summary|
-    2. Navigating                       |pgsep_navig|
-    3. Supplied separators              |pgsep_supplied|
-    4. Key summary                      |pgsep_keys|
-    5. Public functions                 |pgsep_funcs|
+    1. Summary              |pgsep_summary|
+    2. Using                |pgsep_using|
+    3. Navigating           |pgsep_navig|
+    4. Supplied separators  |pgsep_supplied|
+    6. Public functions     |pgsep_funcs|
 
 ======================================================================
 1. Summary                                               *pgsep_summary*
 
 I like to put "page separator" lines in my files. These are special
-lines that this plugin is made to navigate to. I can do a "Page down"
-or "Page up" and the plugin will scroll the text so that the next or
+lines that this plugin is made to navigate to. I can do a ｢Page down｣
+or ｢Page up｣ and the plugin will scroll the text so that the next or
 previous page separator line and the cursor are placed at the top of
-the screen. I can also "Insert" a separator line where the cursor
+the screen. I can also ｢Insert｣ a separator line where the cursor
 happens to be.
 
 A page separator is identified by its nick and it has a pattern and a
 line. Here for example is a separator line that starts with a pound
-sign:
+sign, like Bash comments, and continues with a space and many dashes:
 
-    nick    : ｢pound｣
+    nick    : ｢b｣
     pattern : ｢^# -----｣
     line    : ｢# ----------------------------------------｣
 
@@ -34,12 +34,69 @@ This plugin provides a way to define and use such page separators and
 supplies a bunch of predefined ones that I happen to use.
 
 ======================================================================
-2. Navigating                                              *pgsep_navig*
+2. Using                                                   *pgsep_using*
+
+You can define your own page separators (see |pgsep_funcs|), but you
+might find one of the already supplied ones to be satisfactory.
+
+For example, after having looked at the |pgsep_supplied|, you decide
+to use the separator whose nick is 'b' for your Bash source files.
+That will give you 70 character wide separator lines that look like
+this:
+
+    # ---------- … -----------
+
+So when you have a buffer containing a Bash source file, you can call
+this function to activate the 'b' separator:
+
+    :call PgSep_All('b')
+
+If you always want your Bash files to use this separator, you can
+have for example .config/nvim/ftplugin/sh.vim (for files recognized as
+being shell scripts):
+
+    PgSep_All('b')
+
+From then on, in that buffer, these normal mode mappings will apply:
+
+    <space>i    : Insert page separator line
+    <space>j    : Move to next page down
+    <space>k    : Move to prev page up
+
+Also, the mapping ｢yuh｣ helps by listing all the available
+｢yu⋯｣ commands and all the built-in nicks, looking like this:
+
+    Help.Add.Rem.Line.Only.Main.inSr:Bash:C:Dos:⋯:teX:dZil
+
+The other ｢yu⋯｣ mappings are:
+
+    yua     : Add  : add nick to separ
+    yur     : Rem  : remove nick from separ
+    yul     : Line : use nick for insertion
+    yuo     : Only : only nick in separ and use nick for insertion
+    yum     : main : add nick to separ and use nick for insertion
+    yus     : inSr : insert nick line
+
+These will open a menu prompt and you are expected to enter a
+built-in nick identifying letter to make a selection. For example,
+typing ｢yuo｣ will prompt like this:
+
+    :emenu pgsep.only.
+
+and you could for example enter:
+
+    :emenu pgsep.only.h<cr>
+
+and thus have Html as the only recognized separator (it will
+be used for insertion too).
+
+======================================================================
+3. Navigating                                              *pgsep_navig*
 
 Page up and page down are normal-mapped respectively to ｢<space>j｣ and
 ｢<space>k｣. Insertion is mapped to ｢<space>i｣.
 
-For example, let's suppose the 'pound' separator shown earlier is
+For example, let's suppose the 'b' separator shown earlier is
 active, and that our cursor is at the end of 'dolor̲', third line:
 
     ┌───────────────────────────────────────────────┐
@@ -92,7 +149,7 @@ separator line above it:
     └───────────────────────────────────────────────┘
 
 ======================================================================
-3. Supplied separators                                  *pgsep_supplied*
+4. Supplied separators                                  *pgsep_supplied*
 
 This plugin supplies many built-in separators, constructed from this:
 
@@ -114,10 +171,10 @@ This plugin supplies many built-in separators, constructed from this:
     teX      x       1        %    -
     dZil     z       1        ;-   -
 
-For example, the 'sQl' built-in separator line is 70 characters long
-(hard coded) and looks like this:
+For example, the 'sQl' built-in separator line is 70 (hard coded
+value) characters long and looks like this:
 
-    -- ------------- ... ---------------
+    -- ------------- … ---------------
 
 that is, a Pfx (prefix) of '--', a Space (currently, only vImhelp
 separators have no space), and enough of Mid (middle) characters to
@@ -128,47 +185,17 @@ Each buffer maintains its own set of page separators. Usually, there
 is a single one for a given file type; for example, bash files might
 simply use a separator that looks like this:
 
-    # --------------...---------------
+    # --------------…---------------
 
 But sometimes it can be useful to have more than one. For example,
 you might have lines like this for both PHP and HTML code in a .php
 file:
 
-    <!-- ············...············· -->
-    // --------------...-----------------
+    <!-- ············ … ············· -->
+    // -------------- … -----------------
 
 ======================================================================
-4. Key summary                                              *pgsep_keys*
-
-Normal mode :
-
-        Echoes a short summary of all available ｢yu｣ commands and all
-        the built-in nicks. Looks like this:
-        Help.Use.Drop.Line.Only.Main.inSr:Bash:C:Dos:⋯:teX:dZil
-    yuh
-
-
-    <space>j    : Move page down
-    <space>k    : Move page up
-    <space>i    : Insert page separator line
-
-        These will open a menu prompt and you are expected to enter a
-        built-in nick identifying letter. For example, you will prompt
-        like this:
-            :emenu pgsep.only.
-        and you could for example enter:
-            :emenu pgsep.only.h<cr>
-        and thus have Html as the only recognized separator (it will
-        be used for insertion too).
-    yua     : Add  : add nick to separ
-    yur     : Rem  : remove nick from separ
-    yul     : Line : use nick for insertion
-    yuo     : Only : only nick in separ and use nick for insertion
-    yum     : main : add nick to separ and use nick for insertion
-    yus     : inSr : insert nick line
-
-======================================================================
-5. Public functions                                       *pgsep_funcs*
+6. Public functions                                       *pgsep_funcs*
 
 Use this function to define a page separator:
 
@@ -181,14 +208,14 @@ Use this function to define a page separator:
 For example:
 
     :call PgSep_New(
-      \ 'pound',
+      \ 'b',
       \ '^# -----',
       \ '# ----------------------------------------'
     \)
 
 This will place the definition in ｢g:PgSep_defs｣:
 
-    g:PgSep_defs['pound'] = {
+    g:PgSep_defs['b'] = {
         'patt':'^# -----',
         'line':'# ----------------------------------------'
     }｣
@@ -198,7 +225,7 @@ Other functions :
         Add nick to separ.
     PgSep_Add (｢nick｣)
 
-        Add nick from separ.
+        Remove nick from separ.
     PgSep_Rem (｢nick｣)
 
         Use nick for insertion.
