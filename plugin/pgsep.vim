@@ -194,16 +194,18 @@ func! s:make_pgsep (params)
     exec 'menu pgsep.main.' . l:nick . " :call PgSep_Main('" . l:nick . "')<cr>"
     exec 'menu pgsep.insr.' . l:nick . " :call PgSep_Insr('" . l:nick . "')<cr>"
 
+        " Allow whitespace at the beginning of a separator line.
+        " Added ｢^\s*｣ in front.
     if l:spac == 1
         call PgSep_New(
           \ l:nick,
-          \ '^\(\V' . l:open . '\m \)\+\V' . repeat(l:midl, 10) . '\m',
+          \ '^\s*\(\V' . l:open . '\m \)\+\V' . repeat(l:midl, 10) . '\m',
           \ l:PgSep
         \)
     else
         call PgSep_New(
           \ l:nick,
-          \ '\V' . repeat(l:midl, 10) . '\m',
+          \ '^\s*\V' . repeat(l:midl, 10) . '\m',
           \ l:PgSep
         \)
     endif
