@@ -213,6 +213,7 @@ endfunc
 
 " --------------------------------------------------------------------
 func! s:make_pgseps ()
+    call s:make_pgsep(['!',    '!', 1, '!',    '-'])
     call s:make_pgsep(['Bash',    'b', 1, '#',    '-'])
     call s:make_pgsep(['C',       'c', 1, '/*',   '-', '*/'])
     call s:make_pgsep(['Dos',     'd', 1, ':-',   '-'])
