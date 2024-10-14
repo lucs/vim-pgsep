@@ -1,36 +1,36 @@
-*pgsep.txt*    Plugin for handling custom page separator lines
+======================================================================
+*pgsep.txt*              Plugin for handling custom page separator lines
 
 Author:  Luc St-Louis <lucs@pobox.com>
 License: Same terms as Vim itself
 
-======================================================================
 0. Contents                                             *pgsep_contents*
 
-    1. Summary              |pgsep_summary|
-    2. Using                |pgsep_using|
-    3. Navigating           |pgsep_navig|
-    4. Supplied separators  |pgsep_supplied|
-    6. Public functions     |pgsep_funcs|
+    |pgsep_summary|  1. Summary
+    |pgsep_using|    2. Using
+    |pgsep_navig|    3. Navigating
+    |pgsep_supplied| 4. Supplied separators
+    |pgsep_funcs|    5. Public functions
 
 ======================================================================
 1. Summary                                               *pgsep_summary*
 
 I like to put "page separator" lines in my files. These are special
-lines that this plugin is made to navigate to. I can do a ｢Page down｣
-or ｢Page up｣ and the plugin will scroll the text so that the next or
+lines that this plugin is made to navigate to. I can do a ‹Page down›
+or ‹Page up› and the plugin will scroll the text so that the next or
 previous page separator line and the cursor are placed at the top of
-the screen. I can also ｢Insert｣ a separator line where the cursor
+the screen. I can also ‹Insert› a separator line where the cursor
 happens to be. You can define your own separator lines or use one of
 the supplied ones.
 
 A page separator is identified by its nick and it has a pattern and a
 line. Here for example is a separator line that starts with a pound
-sign, like Bash comments, and continues with a space and many dashes:
+sign, like Bash comments, and continues with a space and many dashes: >
 
-    nick    : ｢b｣
-    pattern : ｢^# -----｣
-    line    : ｢# ----------------------------------------｣
-
+    nick    : ‹b›
+    pattern : ‹^# -----›
+    line    : ‹# ----------------------------------------›
+<
 This plugin provides a way to define and use such page separators and
 supplies a bunch of predefined ones that I happen to use.
 
@@ -64,12 +64,12 @@ From then on, in that buffer, these normal mode mappings will apply:
     <space>j    : Move to next page down
     <space>k    : Move to prev page up
 
-Also, the mapping ｢yuh｣ helps by listing all the available
-｢yu⋯｣ commands and all the built-in nicks, looking like this:
+Also, the mapping ‹yuh› helps by listing all the available
+‹yu⋯› commands and all the built-in nicks, looking like this:
 
     Help.Add.Rem.Line.Only.Main.inSr:Bash:C:Dos:⋯:teX:dZil
 
-The other ｢yu⋯｣ mappings are:
+The other ‹yu⋯› mappings are:
 
     yua     : Add  : add nick to separ
     yur     : Rem  : remove nick from separ
@@ -80,7 +80,7 @@ The other ｢yu⋯｣ mappings are:
 
 These will open a menu prompt and you are expected to enter a
 built-in nick identifying letter to make a selection. For example,
-typing ｢yuo｣ will prompt like this:
+typing ‹yuo› will prompt like this:
 
     :emenu pgsep.only.
 
@@ -94,11 +94,11 @@ be used for insertion too).
 ======================================================================
 3. Navigating                                              *pgsep_navig*
 
-Page up and page down are normal-mapped respectively to ｢<space>j｣ and
-｢<space>k｣. Insertion is mapped to ｢<space>i｣.
+Page up and page down are normal-mapped respectively to ‹<space>j› and
+‹<space>k›. Insertion is mapped to ‹<space>i›.
 
 For example, let's suppose the 'b' separator shown earlier is
-active, and that our cursor is at the end of 'dolor̲', third line:
+active, and that our cursor is at the end of 'dolor̲', third line: >
 
     ┌───────────────────────────────────────────────┐
     │     mollit anim id est laborum.               │
@@ -112,10 +112,10 @@ active, and that our cursor is at the end of 'dolor̲', third line:
     │ # ----------------------------------------    │
     │   Aliquam sed turpis diam.  Vivamus id nunc   │
     └───────────────────────────────────────────────┘
-
+<
 Doing a "Page down" will scroll the text so that the next found
 separator string becomes the first screen line, with the cursor on it,
-in the same column:
+in the same column: >
 
     ┌───────────────────────────────────────────────┐
     │ # -----------------̲-----------------------    │
@@ -130,7 +130,7 @@ in the same column:
     │     dolore magna                              │
     │ # ----------------------------------------    │
     └───────────────────────────────────────────────┘
-
+<
 "Page up" goes in the other direction.
 
 If we move the cursor down to 'pa̲riatur', "Insert" will insert a new
@@ -196,16 +196,16 @@ file:
     // -------------- … -----------------
 
 ======================================================================
-6. Public functions                                       *pgsep_funcs*
+5. Public functions                                        *pgsep_funcs*
 
-Use this function to define a page separator:
+Use this function to define a page separator: >
 
     PgSep_New(
-        ｢nick｣,
-        ｢page separator regex｣,
-        ｢page separator text｣
+        ‹nick›,
+        ‹page separator regex›,
+        ‹page separator text›
     )
-
+<
 For example:
 
     :call PgSep_New(
@@ -214,39 +214,39 @@ For example:
       \ '# ----------------------------------------'
     \)
 
-This will place the definition in ｢g:PgSep_defs｣:
+This will place the definition in ‹g:PgSep_defs›:
 
     g:PgSep_defs['b'] = {
         'patt':'^# -----',
         'line':'# ----------------------------------------'
-    }｣
+    }
 
 Other functions :
 
         Add nick to separ.
-    PgSep_Add (｢nick｣)
+    PgSep_Add (⟨nick⟩)
 
         Remove nick from separ.
-    PgSep_Rem (｢nick｣)
+    PgSep_Rem (⟨nick⟩)
 
         Use nick for insertion.
-    PgSep_Line (｢nick｣)
+    PgSep_Line (⟨nick⟩)
 
         Only nick in separ and use nick for insertion.
-    PgSep_Only (｢nick｣)
+    PgSep_Only (⟨nick⟩)
 
         Add nick to separ and use nick for insertion.
-    PgSep_Main (｢nick｣)
+    PgSep_Main (⟨nick⟩)
 
         Insert nick's or default separator line.
-    PgSep_Insr (｢nick｣?̲)
+    PgSep_Insr (⟨nick⟩?)
 
         Move page down or up.
-    PgSep_Move (❲'j'∣'k'❳1̲)
+    PgSep_Move (❲j∣k❳)
 
         Have all nicks as separ, set first one for insertion.
-    PgSep_All (｢nick｣*̲)
+    PgSep_All (⟨nick⟩*)
 
 ======================================================================
-vim: ft=help et tw=70 ts=4 sts=4 sw=4 :
+vim: ft=help tw=70 ts=4
 
