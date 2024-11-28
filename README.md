@@ -1,8 +1,108 @@
+# vim-pgsep
+
 I like to put "page separator" lines in my files. These are special
-lines that this plugin is made to navigate to. I can do a ｢Page down｣
-or ｢Page up｣ and the plugin will scroll the text so that the next or
+lines that this plugin is made to navigate to. I can do plugin-supplied ‹Go down›
+or ‹Go up› actions and the plugin will make the text scroll so that the next or
 previous page separator line and the cursor are placed at the top of
-the screen. I can also ｢Insert｣ a separator line where the cursor
-happens to be. You can define your own separator lines or use one of
+the screen. I can also ‹Insert› a separator line where the cursor
+happens to be.
+
+‹Go up› and ‹Go down› are normal-mapped respectively to `<space>j` and
+`<space>k`. ‹Insert› is mapped to `<space>i`.
+
+[comment]: # (vim-pgsep separator line)
+## An example
+
+Let's say we have set the separator line to be
+‹`# ----------------`›.
+
+If our cursor is positioned at the `X` character in the diagram on the
+left here, doing a ‹Go Up› will change the window as shown, with the
+cursor landing at the `!`:
+
+        ┌────────────────────────┐      ┌────────────────────────┐
+        │       ... .. . .  .    │      │       ... .. . .  .    │
+        │       .... ........    │      │       .... ........    │
+        │ ╔════════════════════╗ │      │       .  ..... .. .    │
+        │ ║     .  ..... .. .  ║ │      │ ╔════════════════════╗ │
+        │ ║ # ---------------- ║ │      │ ║ # ------!--------- ║ │
+        │ ║   .. . .X.. .....  ║ │      │ ║   .. . .X.. .....  ║ │
+        │ ║   ...... ......... ║ │      │ ║   ...... ......... ║ │
+        │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+        │ ║       .... ...     ║ │      │ ║       .... ...     ║ │
+        │ ║       ..... .      ║ │      │ ║       ..... .      ║ │
+        │ ║       ... ...      ║ │      │ ║       ... ...      ║ │
+        │ ║ # ---------------- ║ │  =>  │ ║ # ---------------- ║ │
+        │ ║     .  ....        ║ │      │ ║     .  ....        ║ │
+        │ ║     ... .          ║ │      │ ║     ... .          ║ │
+        │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+        │ ╚════════════════════╝ │      │ ║            . ....  ║ │
+        │              . ....    │      │ ╚════════════════════╝ │
+        │              .. . .    │      │              .. . .    │
+        │              .....     │      │              .....     │
+        │   # ----------------   │      │   # ----------------   │
+        │      ... ......        │      │      ... ......        │
+        └────────────────────────┘      └────────────────────────┘
+
+Doing ‹Go Down› from the cursor on the ‹Y› on the left here would
+change like this:
+
+        ┌────────────────────────┐      ┌────────────────────────┐
+        │       ... .. . .  .    │      │       ... .. . .  .    │
+        │       .... ........    │      │       .... ........    │
+        │ ╔════════════════════╗ │      │       .  ..... .. .    │
+        │ ║     .  ..... .. .  ║ │      │   # ----------------   │
+        │ ║ # ---------------- ║ │      │     .. . .... .Y...    │
+        │ ║   .. . .... .Y...  ║ │      │     ...... .........   │
+        │ ║   ...... ......... ║ │      │ ╔════════════════════╗ │
+        │ ║ # ---------------- ║ │      │ ║ # -----------!---- ║ │
+        │ ║       .... ...     ║ │      │ ║       .... ...     ║ │
+        │ ║       ..... .      ║ │      │ ║       ..... .      ║ │
+        │ ║       ... ...      ║ │      │ ║       ... ...      ║ │
+        │ ║ # ---------------- ║ │  =>  │ ║ # ---------------- ║ │
+        │ ║     .  ....        ║ │      │ ║     .  ....        ║ │
+        │ ║     ... .          ║ │      │ ║     ... .          ║ │
+        │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+        │ ╚════════════════════╝ │      │ ║            . ....  ║ │
+        │              . ....    │      │ ║            .. . .  ║ │
+        │              .. . .    │      │ ║            .....   ║ │
+        │              .....     │      │ ║ # ---------------- ║ │
+        │   # ----------------   │      │ ╚════════════════════╝ │
+        │      ... ......        │      │      ... ......        │
+        └────────────────────────┘      └────────────────────────┘
+
+And an ‹Insert› from the line with the cursor on `Z`:
+
+        ┌────────────────────────┐      ┌────────────────────────┐
+        │       ... .. . .  .    │      │       ... .. . .  .    │
+        │       .... ........    │      │       .... ........    │
+        │ ╔════════════════════╗ │      │ ╔════════════════════╗ │
+        │ ║     .  ..... .. .  ║ │      │ ║     .  ..... .. .  ║ │
+        │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+        │ ║   .. . .... .....  ║ │      │ ║   .. . .... .....  ║ │
+        │ ║   ...... ......... ║ │      │ ║   ...... ......... ║ │
+        │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+        │ ║       .... ...     ║ │      │ ║       .... ...     ║ │
+        │ ║       ..... .      ║ │      │ ║       ..... .      ║ │
+        │ ║       .Z. ...      ║ │      │ ║ # -----!---------- ║ │
+        │ ║ # ---------------- ║ │  =>  │ ║       .Z. ...      ║ │
+        │ ║     .  ....        ║ │      │ ║ # ---------------- ║ │
+        │ ║     ... .          ║ │      │ ║     .  ....        ║ │
+        │ ║ # ---------------- ║ │      │ ║     ... .          ║ │
+        │ ╚════════════════════╝ │      │ ╚════════════════════╝ │
+        │              .. . .    │      │   # ----------------   │
+        │              .....     │      │              .. . .    │
+        │   # ----------------   │      │              .....     │
+        │      ... ......        │      │   # ----------------   │
+        └────────────────────────┘      └────────────────────────┘
+
+[comment]: # (vim-pgsep separator line)
+## More stuff
+
+The plugin allows having more than one separator line to navigate
+between at the same time. 
+
+You can define your own separator lines or use one of
 the supplied ones.
 
+Have a look at the ‹doc/pgsep.txt› file for details.
