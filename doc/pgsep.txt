@@ -23,13 +23,14 @@ the screen. I can also ‹Insert› a separator line where the cursor
 happens to be. You can define your own separator lines or use one of
 the supplied ones.
 
-A page separator is identified by its nick and it has a pattern and a
-line. Here for example is a separator line that starts with a pound
-sign, like Bash comments, and continues with a space and many dashes: >
+A page separator is identified by its tag and it has a regex pattern
+(so that we can navigate to it) and a line to print when we want to
+insert a separator. Here for example is a separator line that starts
+with a pound sign and continues with a space and many dashes: >
 
-    nick    : ‹b›
+    tag     : ‹b›
     pattern : ‹^# -----›
-    line    : ‹# ----------------------------------------›
+    line    : ‹# ----------------›
 <
 This plugin provides a way to define and use such page separators and
 supplies a bunch of predefined ones that I happen to use.
@@ -40,144 +41,187 @@ supplies a bunch of predefined ones that I happen to use.
 You can define your own page separators (see |pgsep_funcs|), but you
 might find one of the already supplied ones to be satisfactory.
 
-For example, after having looked at the |pgsep_supplied|, you decide
-to use the separator whose nick is 'b' for your Bash source files.
+For example, after having looked at the |pgsep_supplied|, you may decide
+to use the separator whose tag is ‹b› for your Bash source files.
 That will give you 70 character wide separator lines that look like
 this:
 
     # ---------- … -----------
 
 So when you have a buffer containing a Bash source file, you can call
-this function to activate the 'b' separator:
+this function to make the the ‹b› separator the one to use, both for
+navigation and for insertion:
 
     :call PgSep_All('b')
 
-If you always want your Bash files to use this separator, you can
-have for example .config/nvim/ftplugin/sh.vim (for files recognized as
-being shell scripts):
+If you always want your Bash files to use this separator, you can have
+this for example in .config/nvim/ftplugin/sh.vim (for files recognized
+as being shell scripts):
 
     PgSep_All('b')
 
 From then on, in that buffer, these normal mode mappings will apply:
 
     <space>i    : Insert page separator line
-    <space>j    : Move to next page down
-    <space>k    : Move to prev page up
+    <space>j    : Go down to next page
+    <space>k    : Go up to previous page
 
-Also, the mapping ‹yuh› helps by listing all the available
-‹yu⋯› commands and all the built-in nicks, looking like this:
+Also, the mapping ‹yuh› helps by echoing reminders of the other
+available ‹yu⋯› commands and of all the built-in tags. It echoes a
+line that looks like this:
 
-    Help.Add.Rem.Line.Only.Main.inSr:Bash:C:Dos:⋯:teX:dZil
+    Help.Add.Rem.Line.Only.Main.Insr:Bash:C:Dos:⋯:teX:dZil
 
-The other ‹yu⋯› mappings are:
+The other ‹yu⋯› mappings expect you to enter a tag and will then act
+act accordingly:
 
-    yua     : Add  : add nick to separ
-    yur     : Rem  : remove nick from separ
-    yul     : Line : use nick for insertion
-    yuo     : Only : only nick in separ and use nick for insertion
-    yum     : main : add nick to separ and use nick for insertion
-    yus     : inSr : insert nick line
+        Add: Add tag's pattern to lines that can be navigated to.
+    yua
 
-These will open a menu prompt and you are expected to enter a
-built-in nick identifying letter to make a selection. For example,
-typing ‹yuo› will prompt like this:
+        Remove: Remove tag's pattern from lines that can be navigated to.
+    yur
+
+        Line: Use tag's separator line for insertion.
+    yul
+
+        Only: Make the tag's pattern and line the only ones to use for
+        navigation and insertion.
+    yuo
+
+        Main: Add tag's pattern to lines that can be navigated to and make
+        its line the one to use for insertion.
+    yum
+
+        Insert: Insert that tag's separator line.
+    yui
+
+For example, entering ‹yuo› in normal mode will prompt like this:
 
     :emenu pgsep.only.
 
-and you could for example enter:
+and you could for example enter ‹h›, resulting in:
 
     :emenu pgsep.only.h<cr>
 
-and thus have Html as the only recognized separator (it will
-be used for insertion too).
+and thus have Html as the only recognized separator line and as the
+one to use for insertion.
 
 ======================================================================
 3. Navigating                                              *pgsep_navig*
 
-Page up and page down are normal-mapped respectively to ‹<space>j› and
-‹<space>k›. Insertion is mapped to ‹<space>i›.
+‹Go up› and ‹Go down› are normal-mapped respectively to ‹<space>j› and
+‹<space>k›. ‹Insert› is mapped to ‹<space>i›.
 
-For example, let's suppose the 'b' separator shown earlier is
-active, and that our cursor is at the end of 'dolor̲', third line: >
+For example, if we suppose the ‹b› separator shown earlier is active
+and that our cursor is positioned at the ‹X› character, doing a ‹Go
+Up› will change the window as shown, with the cursor landing at the
+‹!›: >
 
-    ┌───────────────────────────────────────────────┐
-    │     mollit anim id est laborum.               │
-    │ # ----------------------------------------    │
-    │   Lorem ipsum dolor̲ sit amet, consectetur     │
-    │     adipisicing elit, sed do eiusmod tempor.  │
-    │ # ----------------------------------------    │
-    │   Duis aute irure dolor in reprehenderit in   │
-    │     voluptate velit esse cillum dolore eu     │
-    │     fugiat nulla pariatur.                    │
-    │ # ----------------------------------------    │
-    │   Aliquam sed turpis diam.  Vivamus id nunc   │
-    └───────────────────────────────────────────────┘
+  ┌────────────────────────┐      ┌────────────────────────┐
+  │       ... .. . .  .    │      │       ... .. . .  .    │
+  │       .... ........    │      │       .... ........    │
+  │ ╔════════════════════╗ │      │       .  ..... .. .    │
+  │ ║     .  ..... .. .  ║ │      │ ╔════════════════════╗ │
+  │ ║ # ---------------- ║ │      │ ║ # ------!--------- ║ │
+  │ ║   .. . .X.. .....  ║ │      │ ║   .. . .X.. .....  ║ │
+  │ ║   ...... ......... ║ │      │ ║   ...... ......... ║ │
+  │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+  │ ║       .... ...     ║ │      │ ║       .... ...     ║ │
+  │ ║       ..... .      ║ │      │ ║       ..... .      ║ │
+  │ ║       ... ...      ║ │      │ ║       ... ...      ║ │
+  │ ║ # ---------------- ║ │  =>  │ ║ # ---------------- ║ │
+  │ ║     .  ....        ║ │      │ ║     .  ....        ║ │
+  │ ║     ... .          ║ │      │ ║     ... .          ║ │
+  │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+  │ ╚════════════════════╝ │      │ ║            . ....  ║ │
+  │              . ....    │      │ ╚════════════════════╝ │
+  │              .. . .    │      │              .. . .    │
+  │              .....     │      │              .....     │
+  │   # ----------------   │      │   # ----------------   │
+  │      ... ......        │      │      ... ......        │
+  └────────────────────────┘      └────────────────────────┘
 <
-Doing a "Page down" will scroll the text so that the next found
-separator string becomes the first screen line, with the cursor on it,
-in the same column: >
+‹Go Down› from the cursor on the ‹Y› here would change like this: >
 
-    ┌───────────────────────────────────────────────┐
-    │ # -----------------̲-----------------------    │
-    │   Duis aute irure dolor in reprehenderit in   │
-    │     voluptate velit esse cillum dolore eu     │
-    │     fugiat nulla pariatur.                    │
-    │ # ----------------------------------------    │
-    │   Aliquam sed turpis diam.  Vivamus id nunc   │
-    │     ut enim ad minim veniam.                  │
-    │ # ----------------------------------------    │
-    │   Sed ut tortor enim ut labore et             │
-    │     dolore magna                              │
-    │ # ----------------------------------------    │
-    └───────────────────────────────────────────────┘
+  ┌────────────────────────┐      ┌────────────────────────┐
+  │       ... .. . .  .    │      │       ... .. . .  .    │
+  │       .... ........    │      │       .... ........    │
+  │ ╔════════════════════╗ │      │       .  ..... .. .    │
+  │ ║     .  ..... .. .  ║ │      │   # ----------------   │
+  │ ║ # ---------------- ║ │      │     .. . .... .Y...    │
+  │ ║   .. . .... .Y...  ║ │      │     ...... .........   │
+  │ ║   ...... ......... ║ │      │ ╔════════════════════╗ │
+  │ ║ # ---------------- ║ │      │ ║ # -----------!---- ║ │
+  │ ║       .... ...     ║ │      │ ║       .... ...     ║ │
+  │ ║       ..... .      ║ │      │ ║       ..... .      ║ │
+  │ ║       ... ...      ║ │      │ ║       ... ...      ║ │
+  │ ║ # ---------------- ║ │  =>  │ ║ # ---------------- ║ │
+  │ ║     .  ....        ║ │      │ ║     .  ....        ║ │
+  │ ║     ... .          ║ │      │ ║     ... .          ║ │
+  │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+  │ ╚════════════════════╝ │      │ ║            . ....  ║ │
+  │              . ....    │      │ ║            .. . .  ║ │
+  │              .. . .    │      │ ║            .....   ║ │
+  │              .....     │      │ ║ # ---------------- ║ │
+  │   # ----------------   │      │ ╚════════════════════╝ │
+  │      ... ......        │      │      ... ......        │
+  └────────────────────────┘      └────────────────────────┘
 <
-"Page up" goes in the other direction.
+And an ‹Insert› from the line with the cursor on ‹Z›: >
 
-If we move the cursor down to 'pa̲riatur', "Insert" will insert a new
-separator line above it:
-
-    ┌───────────────────────────────────────────────┐
-    │ # ----------------------------------------    │
-    │   Duis aute irure dolor in reprehenderit in   │
-    │     voluptate velit esse cillum dolore eu     │
-    │ # -----------------̲-----------------------    │
-    │     fugiat nulla pariatur.                    │
-    │ # ----------------------------------------    │
-    │   Aliquam sed turpis diam.  Vivamus id nunc   │
-    │     ut enim ad minim veniam.                  │
-    │ # ----------------------------------------    │
-    │   Sed ut tortor enim.                         │
-    └───────────────────────────────────────────────┘
+  ┌────────────────────────┐      ┌────────────────────────┐
+  │       ... .. . .  .    │      │       ... .. . .  .    │
+  │       .... ........    │      │       .... ........    │
+  │ ╔════════════════════╗ │      │ ╔════════════════════╗ │
+  │ ║     .  ..... .. .  ║ │      │ ║     .  ..... .. .  ║ │
+  │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+  │ ║   .. . .... .....  ║ │      │ ║   .. . .... .....  ║ │
+  │ ║   ...... ......... ║ │      │ ║   ...... ......... ║ │
+  │ ║ # ---------------- ║ │      │ ║ # ---------------- ║ │
+  │ ║       .... ...     ║ │      │ ║       .... ...     ║ │
+  │ ║       ..... .      ║ │      │ ║       ..... .      ║ │
+  │ ║       .Z. ...      ║ │      │ ║ # -----!---------- ║ │
+  │ ║ # ---------------- ║ │  =>  │ ║       .Z. ...      ║ │
+  │ ║     .  ....        ║ │      │ ║ # ---------------- ║ │
+  │ ║     ... .          ║ │      │ ║     .  ....        ║ │
+  │ ║ # ---------------- ║ │      │ ║     ... .          ║ │
+  │ ╚════════════════════╝ │      │ ╚════════════════════╝ │
+  │              .. . .    │      │   # ----------------   │
+  │              .....     │      │              .. . .    │
+  │   # ----------------   │      │              .....     │
+  │      ... ......        │      │   # ----------------   │
+  └────────────────────────┘      └────────────────────────┘
+<                               
 
 ======================================================================
 4. Supplied separators                                  *pgsep_supplied*
 
 This plugin supplies many built-in separators, constructed from this:
 
-    Name    Nick    Space?   Pfx  Mid Tail
-    --------------------------------------
-    Bash     b       1        #    -
-    C        c       1        /*   -   */
-    Dos      d       1        :-   -
-    tExt     e       1        -    -
-    Html     h       1        <!-- ·   -->
-    vImhelp  i       0        =    =
-    Java     j       1        //   -
-    Lisp     l       1        ;    -
-    tMplmojo m       1        %#   -
-    vrOomx   o       1        #%   -
-    sQl      q       1        --   -
-    Tt2      t       1        [%#- -   -%]
-    Vim      v       1        "    -
-    teX      x       1        %    -
-    dZil     z       1        ;-   -
+    Name    tag    Space?   Pfx  Mid Tail
+    -------------------------------------
+    Bash     b       1       #    -
+    C        c       1       /*   -   */
+    Dos      d       1       :-   -
+    tExt     e       1       -    -
+    Html     h       1       <!-- ·   -->
+    vImhelp  i       0       =    =
+    Java     j       1       //   -
+    Lisp     l       1       ;    -
+    tMplmojo m       1       %#   -
+    vrOomx   o       1       #%   -
+    sQl      q       1       --   -
+    Tt2      t       1       [%#- -   -%]
+    Vim      v       1       "    -
+    teX      x       1       %    -
+    dZil     z       1       ;-   -
 
-For example, the 'sQl' built-in separator line is 70 (hard coded
+For example, the ‹sQl› built-in separator line is 70 (hard coded
 value) characters long and looks like this:
 
     -- ------------- … ---------------
 
-that is, a Pfx (prefix) of '--', a Space (currently, only vImhelp
+that is, a Pfx (prefix) of ‹--›, a Space (currently, only vImhelp
 separators have no space), and enough of Mid (middle) characters to
 fill out a line of 70 characters; if theres is a Tail, the last
 characters of the separator line will be those, preceded by a space.
@@ -201,52 +245,55 @@ file:
 Use this function to define a page separator: >
 
     PgSep_New(
-        ‹nick›,
-        ‹page separator regex›,
-        ‹page separator text›
+        ⟨tag⟩,
+        ⟨page separator regex⟩,
+        ⟨page separator line text⟩
     )
 <
-For example:
+For example: >
 
     :call PgSep_New(
       \ 'b',
       \ '^# -----',
       \ '# ----------------------------------------'
     \)
-
-This will place the definition in ‹g:PgSep_defs›:
+<
+This will place the definition in ‹g:PgSep_defs›: >
 
     g:PgSep_defs['b'] = {
         'patt':'^# -----',
         'line':'# ----------------------------------------'
     }
-
+<
 Other functions :
 
-        Add nick to separ.
-    PgSep_Add (⟨nick⟩)
+        Add tag's pattern to lines that can be navigated to.
+    PgSep_Add (⟨tag⟩)
 
-        Remove nick from separ.
-    PgSep_Rem (⟨nick⟩)
+        Remove tag's pattern from lines that can be navigated to.
+    PgSep_Rem (⟨tag⟩)
 
-        Use nick for insertion.
-    PgSep_Line (⟨nick⟩)
+        Use tag's separator line for insertion.
+    PgSep_Line (⟨tag⟩)
 
-        Only nick in separ and use nick for insertion.
-    PgSep_Only (⟨nick⟩)
+        Make the tag's pattern and line the only ones to use for
+        navigation and insertion.
+    PgSep_Only (⟨tag⟩)
 
-        Add nick to separ and use nick for insertion.
-    PgSep_Main (⟨nick⟩)
+        Add tag's pattern to lines that can be navigated to and make
+        its line the one to use for insertion.
+    PgSep_Main (⟨tag⟩)
 
-        Insert nick's or default separator line.
-    PgSep_Insr (⟨nick⟩?)
+        Insert tag's or default separator line.
+    PgSep_Insr (⟨tag⟩?)
 
-        Move page down or up.
+        Go up or down a page.
     PgSep_Move (❲j∣k❳)
 
-        Have all nicks as separ, set first one for insertion.
-    PgSep_All (⟨nick⟩*)
+        Have all tags's patterns as lines that can be navigated to
+        and use the first one's line for insertion.
+    PgSep_All (⟨tag⟩*)
 
 ======================================================================
-vim: ft=help tw=70 ts=4
+vim: ft=help tw=70 ts=4 sts=4 sw=4 et :
 
