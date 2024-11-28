@@ -20,6 +20,7 @@ If our cursor is positioned at the `X` character in the diagram on the
 left here, doing a ‹Go Up› will change the window as shown, with the
 cursor landing at the `!`:
 
+```
         ┌────────────────────────┐      ┌────────────────────────┐
         │       ... .. . .  .    │      │       ... .. . .  .    │
         │       .... ........    │      │       .... ........    │
@@ -43,10 +44,12 @@ cursor landing at the `!`:
         │   # ----------------   │      │   # ----------------   │
         │      ... ......        │      │      ... ......        │
         └────────────────────────┘      └────────────────────────┘
+```
 
 Doing ‹Go Down› from the cursor on the ‹Y› on the left here would
 change like this:
 
+```
         ┌────────────────────────┐      ┌────────────────────────┐
         │       ... .. . .  .    │      │       ... .. . .  .    │
         │       .... ........    │      │       .... ........    │
@@ -70,9 +73,11 @@ change like this:
         │   # ----------------   │      │ ╚════════════════════╝ │
         │      ... ......        │      │      ... ......        │
         └────────────────────────┘      └────────────────────────┘
+```
 
 And an ‹Insert› from the line with the cursor on `Z`:
 
+```
         ┌────────────────────────┐      ┌────────────────────────┐
         │       ... .. . .  .    │      │       ... .. . .  .    │
         │       .... ........    │      │       .... ........    │
@@ -95,6 +100,7 @@ And an ‹Insert› from the line with the cursor on `Z`:
         │   # ----------------   │      │              .....     │
         │      ... ......        │      │   # ----------------   │
         └────────────────────────┘      └────────────────────────┘
+```
 
 [comment]: # (vim-pgsep separator line)
 ## More stuff
